@@ -6,7 +6,7 @@ from duckduckgo_search import DDGS
 from phi.tools.newspaper4k import Newspaper4k
 from phi.utils.log import logger
 
-from assistants import get_article_summarizer, get_article_writer  # type: ignore
+from assistants import get_article_summarizer, get_article_writer,get_article_writer_chinese,get_article_writer_chinese_out  # type: ignore
 
 nest_asyncio.apply()
 st.set_page_config(
@@ -99,6 +99,7 @@ def main() -> None:
             status.update(label="News Search Complete", state="complete", expanded=False)
 
         if len(news_results) > 0:
+            print(f"Found {len(news_results)} articles")
             news_summary = ""
             with st.status("Summarizing News", expanded=False) as status:
                 article_summarizer = get_article_summarizer(model=summary_model, length=per_article_summary_length)
@@ -146,14 +147,16 @@ def main() -> None:
                 draft_container.markdown(article_draft)
             status.update(label="Draft Complete", state="complete", expanded=False)
 
-        article_writer = get_article_writer(model=writer_model)
+        # article_writer = get_article_writer(model=writer_model)
+        # article_writer = get_article_writer_chinese(model=writer_model)
+        article_writer = get_article_writer_chinese_out(model=writer_model)
         with st.spinner("Writing Article..."):
             final_report = ""
             final_report_container = st.empty()
             for delta in article_writer.run(article_draft):
                 final_report += delta  # type: ignore
                 final_report_container.markdown(final_report)
-
+            print(final_report)
     st.sidebar.markdown("---")
     if st.sidebar.button("Restart"):
         st.rerun()
