@@ -16,6 +16,60 @@ st.set_page_config(
 st.title("News Articles powered by Groq")
 st.markdown("##### :orange_heart: built using [phidata](https://github.com/phidatahq/phidata)")
 
+from deep_translator import GoogleTranslator
+from notion_client import Client
+import re
+def translate_text(text, target_language):
+    # 替换为您自己的Google Cloud API密钥
+    target_language='zh-CN'
+    translator = GoogleTranslator(source='auto', target=target_language)
+    translated_text = translator.translate(text)
+    return translated_text
+
+class notion_client:
+    def __init__(self):
+        global global_notion
+        global global_database_id
+        global_token = "secret_SGSgYlUHk8knQRLcwJr1alzjzVTwXFwrr0UDBawy0Sw"
+        global_database_id = "3ad7d67332a34988868dcdfb03630387"  # 采集-关键字新闻
+        global_notion = Client(auth=global_token)
+        print('开始Notion自动化获取数据...')
+
+    def create_page_blocks(self, page_title,content):
+        new_page = global_notion.pages.create(
+            parent={
+                'database_id': global_database_id
+            },
+            properties={
+                '标题': {
+                    'title': [
+                        {
+                            'text': {
+                                'content': str(page_title)
+                            }
+                        }
+                    ]
+                }
+            },
+            children=[
+                {
+                    "object": "block",
+                    "type": "paragraph",
+                    "paragraph": {
+                        "rich_text": [
+                            {
+                                "type": "text",
+                                "text": {
+                                    "content": content
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
+        )
+        print(f'创建Notion页面成功...{page_title}')
+
 
 def truncate_text(text: str, words: int) -> str:
     return " ".join(text.split()[:words])
@@ -147,16 +201,29 @@ def main() -> None:
                 draft_container.markdown(article_draft)
             status.update(label="Draft Complete", state="complete", expanded=False)
 
-        # article_writer = get_article_writer(model=writer_model)
+        article_writer = get_article_writer(model=writer_model)
         # article_writer = get_article_writer_chinese(model=writer_model)
-        article_writer = get_article_writer_chinese_out(model=writer_model)
+        # article_writer = get_article_writer_chinese_out(model=writer_model)
         with st.spinner("Writing Article..."):
             final_report = ""
             final_report_container = st.empty()
             for delta in article_writer.run(article_draft):
                 final_report += delta  # type: ignore
                 final_report_container.markdown(final_report)
-            print(final_report)
+
+            #TODO: 数据存储Notion 翻译中文后存储
+            try:
+                final_report_chinese=translate_text(final_report,None)
+                final_report_chinese = final_report_chinese.replace('＃＃＃', '###')
+                pattern = re.compile(r'##\s*(.*)$', re.MULTILINE)
+                matches = pattern.findall(final_report_chinese)
+                title = matches[0]
+                client = notion_client()
+                client.create_page_blocks(page_title=title,content=final_report_chinese)
+            except Exception as e:
+                print(f'Notion存储异常:{e}')
+
+
     st.sidebar.markdown("---")
     if st.sidebar.button("Restart"):
         st.rerun()
