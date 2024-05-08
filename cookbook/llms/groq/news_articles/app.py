@@ -235,7 +235,11 @@ def main() -> None:
 
         #TODO: 数据存储Notion 翻译中文后存储
         try:
-            image_url=image_results[0]
+            image_url=''
+            for image in image_results:
+                if image.startswith('http'):
+                    image_url=image
+                    break      
             if len(image_results)==0:
                 print('没有图片')
                 return
