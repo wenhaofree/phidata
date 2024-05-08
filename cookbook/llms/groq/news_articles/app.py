@@ -240,9 +240,10 @@ def main() -> None:
                 if image.startswith('http'):
                     image_url=image
                     break      
-            if len(image_results)==0:
+            if len(image_url)==0:
                 print('没有图片')
                 return
+            image_url=f'![Image]({image_url})'
             final_report_chinese=translate_text(final_report,None)
             final_report_chinese = final_report_chinese.replace('＃＃＃', '###')
             print(final_report_chinese)
@@ -253,7 +254,11 @@ def main() -> None:
             matches = pattern.findall(final_report_chinese)
             title = matches[0]
             client = notion_client()
-            client.create_page_blocks(page_title=title,content=final_report_chinese,image_url=image_url)
+            final_report_chinese_ok = ""
+            final_report_chinese_ok +=image_url
+            final_report_chinese_ok +='\n\n'
+            final_report_chinese_ok +=final_report_chinese
+            client.create_page_blocks(page_title=title,content=final_report_chinese_ok,image_url=image_url)
         except Exception as e:
             print(f'Notion存储异常:{e}')
 
@@ -263,4 +268,20 @@ def main() -> None:
         st.rerun()
 
 
+# def test():
+#     client = notion_client()
+#     title="test"
+#     # image_url=f'![Image](https://9to5mac.com/wp-content/uploads/sites/6/2024/01/Security-Bite-FI-1.png?w=1600)'
+#     image_url=f'![Image](https://prod-files-secure.s3.us-west-2.amazonaws.com/b0012720-ccd1-41ef-9ca9-02f55a45f30f/3516c3c5-f7d2-415f-93d2-684c02cb1300/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45HZZMZUHI%2F20240508%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20240508T152400Z&X-Amz-Expires=3600&X-Amz-Signature=ee700820721eb30c586ecb1a5d5f9b72ae3eed29a1f7fb16c2730ba415bad7ad&X-Amz-SignedHeaders=host&x-id=GetObject)'
+#     final_report_chinese='''## Apple iPad Pro M4: Revolutionizing Mobile Productivity and AI Capabilities ### Overview
+#     On May 7, 2024, Apple unveiled its latest iPad Pro models, powered by the groundbreaking M4 chip. This new chip brings significant advancements in CPU, GPU, and AI capabilities, making it a game-changer for mobile productivity and AI applications. In this article, we'll delve into the features, benefits, and implications of the M4 chip and the new iPad Pro models.
+
+#     '''
+#     final_report_chinese_ok = ""
+#     final_report_chinese_ok +=image_url
+#     final_report_chinese_ok +='\n\n'
+#     final_report_chinese_ok +=final_report_chinese
+#     client.create_page_blocks(page_title=title,content=final_report_chinese_ok,image_url=image_url)
+
 main()
+# test()
