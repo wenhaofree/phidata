@@ -204,6 +204,7 @@ def main() -> None:
         article_writer = get_article_writer(model=writer_model)
         # article_writer = get_article_writer_chinese(model=writer_model)
         # article_writer = get_article_writer_chinese_out(model=writer_model)
+        final_report = ""
         with st.spinner("Writing Article..."):
             final_report = ""
             final_report_container = st.empty()
@@ -211,17 +212,21 @@ def main() -> None:
                 final_report += delta  # type: ignore
                 final_report_container.markdown(final_report)
 
-            #TODO: 数据存储Notion 翻译中文后存储
-            try:
-                final_report_chinese=translate_text(final_report,None)
-                final_report_chinese = final_report_chinese.replace('＃＃＃', '###')
-                pattern = re.compile(r'##\s*(.*)$', re.MULTILINE)
-                matches = pattern.findall(final_report_chinese)
-                title = matches[0]
-                client = notion_client()
-                client.create_page_blocks(page_title=title,content=final_report_chinese)
-            except Exception as e:
-                print(f'Notion存储异常:{e}')
+        #TODO: 数据存储Notion 翻译中文后存储
+        try:
+            final_report_chinese=translate_text(final_report,None)
+            final_report_chinese = final_report_chinese.replace('＃＃＃', '###')
+            print(final_report_chinese)
+            if final_report_chinese is None:
+                print('翻译失败')
+                return
+            pattern = re.compile(r'##\s*(.*)$', re.MULTILINE)
+            matches = pattern.findall(final_report_chinese)
+            title = matches[0]
+            client = notion_client()
+            client.create_page_blocks(page_title=title,content=final_report_chinese)
+        except Exception as e:
+            print(f'Notion存储异常:{e}')
 
 
     st.sidebar.markdown("---")
