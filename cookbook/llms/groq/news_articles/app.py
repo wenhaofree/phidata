@@ -35,7 +35,7 @@ class notion_client:
         global_notion = Client(auth=global_token)
         print('开始Notion自动化获取数据...')
 
-    def create_page_blocks(self, page_title,content):
+    def create_page_blocks(self, page_title,content,image_url):
         new_page = global_notion.pages.create(
             parent={
                 'database_id': global_database_id
@@ -49,7 +49,26 @@ class notion_client:
                             }
                         }
                     ]
-                }
+                },
+                "Tags": {
+                    "multi_select": [
+                        {
+                            "name": '初始化'
+                        }
+                    ]
+                },
+                "图片文件": {
+                    "files": [
+                        {
+                            "name": "文件1",
+                            "type": "external",
+                            "external": {
+                                "url": str(image_url)
+                            }
+                        }
+                    ]
+                },
+                
             },
             children=[
                 {
@@ -132,6 +151,7 @@ def main() -> None:
     )
     write_article = st.button("Write Article")
     if write_article:
+        image_results = []
         news_results = []
         news_summary: Optional[str] = None
         with st.status("Reading News", expanded=False) as status:
@@ -160,6 +180,7 @@ def main() -> None:
                 with st.container():
                     summary_container = st.empty()
                     for news_result in news_results:
+                        image_results.append(news_result["image"])
                         news_summary += f"### {news_result['title']}\n\n"
                         news_summary += f"- Date: {news_result['date']}\n\n"
                         news_summary += f"- URL: {news_result['url']}\n\n"
@@ -214,6 +235,10 @@ def main() -> None:
 
         #TODO: 数据存储Notion 翻译中文后存储
         try:
+            image_url=image_results[0]
+            if len(image_results)==0:
+                print('没有图片')
+                return
             final_report_chinese=translate_text(final_report,None)
             final_report_chinese = final_report_chinese.replace('＃＃＃', '###')
             print(final_report_chinese)
@@ -224,7 +249,7 @@ def main() -> None:
             matches = pattern.findall(final_report_chinese)
             title = matches[0]
             client = notion_client()
-            client.create_page_blocks(page_title=title,content=final_report_chinese)
+            client.create_page_blocks(page_title=title,content=final_report_chinese,image_url=image_url)
         except Exception as e:
             print(f'Notion存储异常:{e}')
 
