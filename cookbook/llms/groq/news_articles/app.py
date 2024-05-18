@@ -6,7 +6,7 @@ from duckduckgo_search import DDGS
 from phi.tools.newspaper4k import Newspaper4k
 from phi.utils.log import logger
 
-from assistants import get_article_summarizer, get_article_writer,get_article_writer_chinese,get_article_writer_chinese_out  # type: ignore
+from assistants import get_article_summarizer, get_article_writer  # type: ignore
 
 nest_asyncio.apply()
 st.set_page_config(
@@ -35,7 +35,7 @@ class notion_client:
         global_notion = Client(auth=global_token)
         print('开始Notion自动化获取数据...')
 
-    def create_page_blocks(self, page_title,content,image_url):
+    def create_page_blocks(self, page_title,content,image_url,categorize):
         new_page = global_notion.pages.create(
             parent={
                 'database_id': global_database_id
@@ -49,6 +49,11 @@ class notion_client:
                             }
                         }
                     ]
+                },
+                '文章类型':{
+                    "select": {
+                        "name": categorize
+                    }
                 },
                 "Tags": {
                     "multi_select": [
@@ -92,6 +97,15 @@ class notion_client:
 
 def truncate_text(text: str, words: int) -> str:
     return " ".join(text.split()[:words])
+
+ #领域判断:
+def categorize_string(input_str):
+    if 'Tech' in input_str:
+        return '科技'
+    elif 'NBA' in input_str:
+        return '体育'
+    else:
+        return '未知'  # Or return None, or raise an exception, depending on your needs
 
 
 def main() -> None:
@@ -232,7 +246,10 @@ def main() -> None:
             for delta in article_writer.run(article_draft):
                 final_report += delta  # type: ignore
                 final_report_container.markdown(final_report)
-
+        
+        
+        categorize = categorize_string(article_topic)
+        print(categorize)
         #TODO: 数据存储Notion 翻译中文后存储
         try:
             image_url=''
@@ -258,7 +275,7 @@ def main() -> None:
             final_report_chinese_ok +=image_url
             final_report_chinese_ok +='\n\n'
             final_report_chinese_ok +=final_report_chinese
-            client.create_page_blocks(page_title=title,content=final_report_chinese_ok,image_url=image_url)
+            client.create_page_blocks(page_title=title,content=final_report_chinese_ok,image_url=image_url,categorize=categorize)
         except Exception as e:
             print(f'Notion存储异常:{e}')
 
