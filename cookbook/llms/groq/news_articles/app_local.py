@@ -378,7 +378,7 @@ def main(page_id:None,page_title:None,program_start:None,page_picture_url:None) 
         
         
         categorize = categorize_string(article_topic)
-        print(categorize)
+        # print(categorize)
         #TODO: 数据存储Notion 翻译中文后存储  更新正文
         try:
             image_url=''
@@ -392,13 +392,14 @@ def main(page_id:None,page_title:None,program_start:None,page_picture_url:None) 
             image_url=f'![Image]({image_url})'
             final_report_chinese=translate_text(final_report,None)
             final_report_chinese = final_report_chinese.replace('＃＃＃', '###')
-            print(final_report_chinese)
+            # print(final_report_chinese)
             if final_report_chinese is None:
                 print('翻译失败')
                 return
             pattern = re.compile(r'##\s*(.*)$', re.MULTILINE)
             matches = pattern.findall(final_report_chinese)
             title = matches[0]
+            print(f'标题:{title}')
             client = notion_client()
             final_report_chinese_ok = ""
             final_report_chinese_ok +=image_url
@@ -409,6 +410,7 @@ def main(page_id:None,page_title:None,program_start:None,page_picture_url:None) 
             article_summarizer_now = get_article_summarizer_now(model=summary_model, length=per_article_summary_length)
             _summary: str = article_summarizer_now.run(final_report, stream=False)
             _summary_chinese=translate_text(_summary,None)
+            _summary_chinese = _summary_chinese.replace('＃＃＃', '###')
 
             if len(final_report_chinese_ok)<2500:
                 final_report_chinese_ok=final_report_chinese_ok[:2000] #长度限制
@@ -453,46 +455,6 @@ def general_article(client, params: str):
             }
             return content
     return None, None
-
-def test():
-    text='''
-## **华硕推出 Vivobook S 15：首款配备 Qualcomm Snapdragon X Elite 处理器的 Copilot+ PC**
-
-### **概述**
-华硕通过推出该公司首款 Copilot+ PC 笔记本电脑 Vivobook S 15，在人工智能驱动的计算领域取得了重大飞跃。这款笔记本电脑由 Qualcomm Snapdragon X Elite 处理器提供支持，有望彻底改变我们与设备交互的方式。凭借其时尚的设计、令人印象深刻的规格和创新功能，Vivobook S 15 必将改变移动计算领域的游戏规则。
-
-### **设计和规格**
-Vivobook S 15 采用全金属设计，配备 15.6 英寸 OLED 显示屏，分辨率为 2,880 x 1,620，刷新率为 120 Hz。这款笔记本电脑重量仅为 3.13 磅，非常适合忙碌的人们。它配备 16GB 或 32GB RAM 选项以及用于板载存储的 1TB SSD。此外，它还具有用于额外存储的 microSD 读卡器、HDMI、两个 USB-A 端口和两个 USB-C 端口。一次充电电池续航时间预计可达 18 小时。
-
-### **创新功能**
-Vivobook S 15 不仅仅是一台笔记本电脑，它还是通往人工智能体验新世界的门户。凭借高通 Snapdragon X Elite 处理器，该设备能够提供无与伦比的性能和功能。它支持 Microsoft 的 Copilot+ 功能，包括 Recall、Windows 照片中的 AI 升级、用于视频通话的增强型 Windows Studio 效果以及实时字幕。该笔记本电脑还具有自适应屏幕调光和锁定系统、带有两个风扇、两个热管和两个排气口的冷却系统。
-
-### **供货情况和定价**
-华硕 Vivobook S 15 现已接受预订，起价为 1,300 美元。该设备将彻底改变移动计算世界，它的上市标志着人工智能个人电脑的发展向前迈出了重要一步。
-
-### **外卖**
-
-* Asus Vivobook S 15 是首款 Copilot+ PC 笔记本电脑，标志着人工智能计算领域向前迈出了重要一步。
-* 这款笔记本电脑采用全金属设计、令人印象深刻的规格以及自适应屏幕调光和锁定系统等创新功能。
-* 该设备搭载 Qualcomm Snapdragon X Elite 处理器，提供无与伦比的性能和功能。
-* Vivobook S 15 现已接受预订，起价为 1,300 美元。
-
-### **参考**
-- [华硕 Vivobook S 15 笔记本电脑将成为该公司首款 Copilot+ PC 笔记本电脑](https://www.neowin.net/news/the-asus-vivobook-s-15-laptop-will-be-the-companys-第一副驾驶电脑笔记本/)
-- [华硕将 Snapdragon X 芯片引入其 Vivobook S 15 OLED 半高端笔记本电脑系列](https://liliputing.com/asus-brings-snapdragon-x-chips-to-is-vivobook-s-15-oled -半高级笔记本电脑系列/)
-- [这是第一批搭载高通 Snapdragon X 系列芯片的“Copilot+”个人电脑](https://www.thurrott.com/a-i/302760/here-are-the-first-copilot-pcs-powered-by-qualcomms -snapdragon-x-系列芯片）
-- [Copilot+ 电脑简介](https://blogs.microsoft.com/blog/2024/05/20/introducing-copilot-pcs/)
-'''
-    # {'page_id': '6c9cb446-5715-453e-a59b-74e327fe9b96', 'page_picture': {'name': 'Integromat', 'type': 'external', 'external': {'url': 'https://media.bleacherreport.com/image/upload/c_fill,g_faces,w_3800,h_2000,q_95/v1716224915/ewqar7jtqbjsruak1b4o.jpg'}}, 'page_title': 'Paul Pierce Suffered Horrific Finger Injury After 45-Pound Weight Fell During Workout'}
-    title='这是测试'
-    page_id='6c9cb446-5715-453e-a59b-74e327fe9b96'
-    page_picture='https://media.bleacherreport.com/image/upload/c_fill,g_faces,w_3800,h_2000,q_95/v1716224915/ewqar7jtqbjsruak1b4o.jpg'
-    client = notion_client()
-    if client.update_page_blocks(page_id=page_id,page_title=title,page_content=text,picture_url=page_picture):
-            content='总结性内容'
-            # content=news_summary
-            client.update_page_content(page_id, title, "格式化",content)
-
 def main_pro():
     '''
     1. 查询
@@ -503,8 +465,8 @@ def main_pro():
      # 1. 获取数据-三天内
     day = get_yesterday()
     content=general_article(client=client,params=day)
-    print(content)
     page_title=content['page_title']
+    print(f'page_title:{page_title}')
     page_id=content['page_id']
     page_picture=content['page_picture']
     page_picture_url=page_picture['external']['url']

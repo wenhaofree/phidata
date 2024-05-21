@@ -14,7 +14,7 @@ def job():
     print('[格式化文章发布完毕,定时程序结束...]')
 
 def schedule_job():
-    schedule.every(10).minutes.do(job)
+    schedule.every(5).minutes.do(job)
     # schedule.every(10).seconds.do(job)
 
     while True:
