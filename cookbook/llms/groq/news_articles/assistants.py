@@ -40,6 +40,34 @@ def get_article_summarizer(
         debug_mode=debug_mode,
     )
 
+def get_article_summarizer_now(
+    model: str = "llama3-8b-8192",
+    length: int = 100,
+    debug_mode: bool = False,
+) -> Assistant:
+    return Assistant(
+        name="Article Summarizer",
+        llm=Groq(model=model),
+        description="You are a Senior NYT Editor and your task is to summarize a newspaper article.",
+        instructions=[
+            "You will be provided with the text from a newspaper article.",
+            "Carefully read the article and prepare a concise summary of key facts and details.",
+            f"Your summary should be less than {length} words.",
+            "Focus on the most important points and avoid unnecessary details.",
+            "Your summary will be used to generate a final New York Times worthy report.",
+            "REMEMBER: you are writing for the New York Times, so the quality of the summary is important.",
+            "Make sure your summary is properly formatted and follows the <summary_format> provided below.",
+        ],
+        add_to_system_prompt=dedent("""
+        <summary_format>
+        {concise summary of the article}
+        </summary_format>
+        """),
+        # This setting tells the LLM to format messages in markdown
+        markdown=True,
+        add_datetime_to_instructions=True,
+        debug_mode=debug_mode,
+    )
 
 def get_article_writer(
     model: str = "llama3-70b-8192",
