@@ -249,7 +249,7 @@ def categorize_string(input_str):
         return '未知'  # Or return None, or raise an exception, depending on your needs
 
 
-def main(page_id:None,page_title:None,program_start:None,page_picture_url:None) -> None:
+def main(client,page_id:None,page_title:None,program_start:None,page_picture_url:None) -> None:
     # Get models
     # summary_model = st.sidebar.selectbox(
     #     "Select Summary Model", options=["llama3-8b-8192", "mixtral-8x7b-32768", "llama3-70b-8192"]
@@ -362,7 +362,8 @@ def main(page_id:None,page_title:None,program_start:None,page_picture_url:None) 
 
 
         if news_summary is None:
-            return
+            client.update_page_content(page_id, page_title, "作废","content")
+            return '作废'
 
 
 
@@ -407,7 +408,7 @@ def main(page_id:None,page_title:None,program_start:None,page_picture_url:None) 
             matches = pattern.findall(final_report_chinese)
             title = matches[0]
             print(f'标题:{title}')
-            client = notion_client()
+            # client = notion_client()
             final_report_chinese_ok = ""
             final_report_chinese_ok +=image_url
             final_report_chinese_ok +='\n\n'
@@ -479,9 +480,12 @@ def main_pro():
     page_picture_url=page_picture['external']['url']
     program_start=True
     try:
-        main(page_id,page_title,program_start,page_picture_url)
+        result=main(client,page_id,page_title,program_start,page_picture_url)
+        if result=='作废':
+            main_pro()
     except Exception as e:
         print(f'程序异常:{e}')
+    print('程序结束')
 
 if __name__ == '__main__':
     # test()
