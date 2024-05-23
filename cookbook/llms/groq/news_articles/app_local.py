@@ -11,12 +11,12 @@ from phi.utils.log import logger
 from assistants import get_article_summarizer, get_article_writer ,get_article_summarizer_now # type: ignore
 
 nest_asyncio.apply()
-st.set_page_config(
-    page_title="News Articles",
-    page_icon=":orange_heart:",
-)
-st.title("News Articles powered by Groq")
-st.markdown("##### :orange_heart: built using [phidata](https://github.com/phidatahq/phidata)")
+# st.set_page_config(
+#     page_title="News Articles",
+#     page_icon=":orange_heart:",
+# )
+# st.title("News Articles powered by Groq")
+# st.markdown("##### :orange_heart: built using [phidata](https://github.com/phidatahq/phidata)")
 
 from deep_translator import GoogleTranslator
 from notion_client import Client
@@ -251,67 +251,74 @@ def categorize_string(input_str):
 
 def main(page_id:None,page_title:None,program_start:None,page_picture_url:None) -> None:
     # Get models
-    summary_model = st.sidebar.selectbox(
-        "Select Summary Model", options=["llama3-8b-8192", "mixtral-8x7b-32768", "llama3-70b-8192"]
-    )
+    # summary_model = st.sidebar.selectbox(
+    #     "Select Summary Model", options=["llama3-8b-8192", "mixtral-8x7b-32768", "llama3-70b-8192"]
+    # )
     # Set assistant_type in session state
-    if "summary_model" not in st.session_state:
-        st.session_state["summary_model"] = summary_model
-    # Restart the assistant if assistant_type has changed
-    elif st.session_state["summary_model"] != summary_model:
-        st.session_state["summary_model"] = summary_model
-        st.rerun()
+    # if "summary_model" not in st.session_state:
+    #     st.session_state["summary_model"] = summary_model
+    # # Restart the assistant if assistant_type has changed
+    # elif st.session_state["summary_model"] != summary_model:
+    #     st.session_state["summary_model"] = summary_model
+    #     st.rerun()
 
-    writer_model = st.sidebar.selectbox(
-        "Select Writer Model", options=["llama3-70b-8192", "llama3-8b-8192", "mixtral-8x7b-32768"]
-    )
-    # Set assistant_type in session state
-    if "writer_model" not in st.session_state:
-        st.session_state["writer_model"] = writer_model
-    # Restart the assistant if assistant_type has changed
-    elif st.session_state["writer_model"] != writer_model:
-        st.session_state["writer_model"] = writer_model
-        st.rerun()
+    # writer_model = st.sidebar.selectbox(
+    #     "Select Writer Model", options=["llama3-70b-8192", "llama3-8b-8192", "mixtral-8x7b-32768"]
+    # )
+    # # Set assistant_type in session state
+    # if "writer_model" not in st.session_state:
+    #     st.session_state["writer_model"] = writer_model
+    # # Restart the assistant if assistant_type has changed
+    # elif st.session_state["writer_model"] != writer_model:
+    #     st.session_state["writer_model"] = writer_model
+    #     st.rerun()
 
-    # Checkboxes for research options
-    st.sidebar.markdown("## Research Options")
-    num_search_results = st.sidebar.slider(
-        ":sparkles: Number of Search Results",
-        min_value=3,
-        max_value=20,
-        value=7,
-        help="Number of results to search for, note only the articles that can be read will be summarized.",
-    )
-    per_article_summary_length = st.sidebar.slider(
-        ":sparkles: Length of Article Summaries",
-        min_value=100,
-        max_value=2000,
-        value=800,
-        step=100,
-        help="Number of words per article summary",
-    )
-    news_summary_length = st.sidebar.slider(
-        ":sparkles: Length of Draft",
-        min_value=1000,
-        max_value=10000,
-        value=5000,
-        step=100,
-        help="Number of words in the draft article, this should fit the context length of the model.",
-    )
+    # # Checkboxes for research options
+    # st.sidebar.markdown("## Research Options")
+    # num_search_results = st.sidebar.slider(
+    #     ":sparkles: Number of Search Results",
+    #     min_value=3,
+    #     max_value=20,
+    #     value=7,
+    #     help="Number of results to search for, note only the articles that can be read will be summarized.",
+    # )
+    # per_article_summary_length = st.sidebar.slider(
+    #     ":sparkles: Length of Article Summaries",
+    #     min_value=100,
+    #     max_value=2000,
+    #     value=800,
+    #     step=100,
+    #     help="Number of words per article summary",
+    # )
+    # news_summary_length = st.sidebar.slider(
+    #     ":sparkles: Length of Draft",
+    #     min_value=1000,
+    #     max_value=10000,
+    #     value=5000,
+    #     step=100,
+    #     help="Number of words in the draft article, this should fit the context length of the model.",
+    # )
 
     # Get topic for report
-    article_topic = st.text_input(
-        ":spiral_calendar_pad: Enter a topic",
-        # value="Hashicorp IBM",
-        value=f'{page_title}',
-    )
-    if page_title is not None:
-        article_topic=page_title
+    # article_topic = st.text_input(
+    #     ":spiral_calendar_pad: Enter a topic",
+    #     # value="Hashicorp IBM",
+    #     value=f'{page_title}',
+    # )
+    # if page_title is not None:
+    #     article_topic=page_title
         
-    write_article = st.button("Write Article")
-    if program_start:
-        write_article=True
+    # write_article = st.button("Write Article")
+    # if program_start:
+    #     write_article=True
 
+    article_topic=page_title
+    num_search_results=8
+    summary_model='llama3-8b-8192'
+    per_article_summary_length=1000
+    news_summary_length=5000
+    writer_model='llama3-70b-8192'
+    write_article=True
     if write_article:
         image_results = []
         news_results = []
@@ -471,7 +478,10 @@ def main_pro():
     page_picture=content['page_picture']
     page_picture_url=page_picture['external']['url']
     program_start=True
-    main(page_id,page_title,program_start,page_picture_url)
+    try:
+        main(page_id,page_title,program_start,page_picture_url)
+    except Exception as e:
+        print(f'程序异常:{e}')
 
 if __name__ == '__main__':
     # test()
