@@ -28,7 +28,7 @@ SSL_CERT = getenv("SINGLESTORE_SSL_CERT", None)
 db_url = f"mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DATABASE}?charset=utf8mb4"
 if SSL_CERT:
     db_url += f"&ssl_ca={SSL_CERT}&ssl_verify_cert=true"
-# -*- SingleStore DB Engine
+# -*- single_store_db_engine
 db_engine = create_engine(db_url)
 # ****************************************************************
 
@@ -176,7 +176,8 @@ def get_research_assistant(
             "Remember: you are writing for the New York Times, so the quality of the report is important.",
         ],
         add_datetime_to_instructions=True,
-        add_to_system_prompt=dedent("""
+        add_to_system_prompt=dedent(
+            """
         <report_format>
         ## Title
 
@@ -204,7 +205,8 @@ def get_research_assistant(
         - [Reference 2](Link to Source)
         - Report generated on: {Month Date, Year (hh:mm AM/PM)}
         </report_format>
-        """),
+        """
+        ),
         markdown=True,
         debug_mode=debug_mode,
         # -*- Disable memory to save on tokens
